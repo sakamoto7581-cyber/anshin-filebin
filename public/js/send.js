@@ -183,13 +183,37 @@ form.addEventListener('submit', async (e) => {
 });
 
 // ---------- 完了画面 ----------
+// 「相手への案内文をコピー」用に、直近の共有URLと回数上限を保持する
+let lastShare = null; // { url: string, maxDownloads: number }
+
+function buildGuideText({ url, maxDownloads }) {
+  return [
+    'ファイルを送りました。',
+    `ダウンロードURL：${url}`,
+    `有効期限は3日間、ダウンロードは${maxDownloads}回までです。`,
+    'パスワードは別の方法でお伝えします。',
+  ].join('\n');
+}
+
 function showResult(url, password, maxDownloads) {
+  lastShare = { url, maxDownloads };
   form.classList.add('hidden');
   $('result').classList.remove('hidden');
   $('share-url').value = url;
   $('share-password').value = password;
   $('result-summary').textContent =
     `ダウンロード可能回数: ${maxDownloads} 回 ／ 保存期間: アップロードから3日間。期限切れ・上限到達でサーバーから自動削除されます。`;
+}
+
+function flashCopied(btn) {
+  if (btn.dataset.copying) return; // 連打で元の文言が「コピーしました」に置き換わらないようにする
+  btn.dataset.copying = '1';
+  const label = btn.textContent;
+  btn.textContent = 'コピーしました';
+  setTimeout(() => {
+    btn.textContent = label;
+    delete btn.dataset.copying;
+  }, 1500);
 }
 
 async function copyFrom(inputId, btn) {
@@ -200,10 +224,29 @@ async function copyFrom(inputId, btn) {
     input.select();
     document.execCommand('copy');
   }
-  const label = btn.textContent;
-  btn.textContent = 'コピーしました';
-  setTimeout(() => (btn.textContent = label), 1500);
+  flashCopied(btn);
 }
+
+/** 任意のテキストをコピーする（Clipboard API が使えない環境では一時 textarea で execCommand） */
+async function copyText(text, btn) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+  }
+  flashCopied(btn);
+}
+$('copy-guide').addEventListener('click', (e) => {
+  if (lastShare) copyText(buildGuideText(lastShare), e.currentTarget);
+});
 $('copy-url').addEventListener('click', (e) => copyFrom('share-url', e.currentTarget));
 $('copy-password').addEventListener('click', (e) => copyFrom('share-password', e.currentTarget));
 
@@ -214,6 +257,7 @@ $('send-another').addEventListener('click', () => {
   passwordInput.type = 'password';
   $('toggle-password').textContent = '表示';
   $('share-password').value = '';
+  lastShare = null;
   hideStatus();
   hideProgress();
   $('result').classList.add('hidden');

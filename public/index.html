@@ -6,7 +6,90 @@
   <!-- API のベースURL。Pages と Worker を同じドメインで動かす場合は空のまま。
        別ドメインの Worker を使う場合は例: content="https://secure-file-share.<account>.workers.dev" -->
   <meta name="api-base" content="">
-  <title>セキュアファイル共有 — 送信</title>
+  <title>ファイル暗号化メーカー｜パスワードで暗号化して送るファイル共有（最大50MB・登録不要）</title>
+  <meta name="description" content="パスワード付きZIP（PPAP）に代わる、ブラウザ完結の暗号化ファイル共有。ファイルは送信者のブラウザ内で暗号化され、サーバーには暗号化データしか残りません。最大50MB、保存は3日間、ダウンロード回数は1〜10回まで指定可能。登録不要・無料。">
+  <link rel="canonical" href="https://file.homepage-kobo.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ファイル暗号化メーカー">
+  <meta property="og:title" content="ファイル暗号化メーカー｜パスワードで暗号化して送るファイル共有（最大50MB・登録不要）">
+  <meta property="og:description" content="パスワード付きZIP（PPAP）に代わる、ブラウザ完結の暗号化ファイル共有。ファイルは送信者のブラウザ内で暗号化され、サーバーには暗号化データしか残りません。最大50MB、保存は3日間、ダウンロード回数は1〜10回まで指定可能。登録不要・無料。">
+  <meta property="og:url" content="https://file.homepage-kobo.com/">
+  <meta property="og:image" content="https://homepage-kobo.com/assets/og-file-encrypt.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://homepage-kobo.com/assets/og-file-encrypt.jpg">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ファイル暗号化メーカー",
+    "url": "https://file.homepage-kobo.com/",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "JPY"
+    },
+    "featureList": [
+      "ブラウザ内暗号化（AES-GCM 256bit）",
+      "最大50MB",
+      "保存期間3日間",
+      "ダウンロード回数制限（1〜10回）",
+      "登録不要"
+    ],
+    "description": "パスワード付きZIP（PPAP）に代わる、ブラウザ完結の暗号化ファイル共有。ファイルは送信者のブラウザ内で暗号化され、サーバーには暗号化データしか残りません。最大50MB、保存は3日間、ダウンロード回数は1〜10回まで指定可能。登録不要・無料。"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "無料で使えますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。会員登録も不要で、無料で使えます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "サーバーにファイルの中身を見られることはありますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ありません。ファイルは送信者のブラウザの中でパスワードから作った鍵で暗号化され、サーバーには暗号化されたデータしか保存されません。パスワードもサーバーには送られません。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "パスワード付きZIP（PPAP）と何が違いますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "PPAPは「暗号化ZIPとパスワードを同じ経路で送る」運用になりやすく、安全性に課題があります。ファイル暗号化メーカーは暗号化したデータだけをサーバーに預け、URLとパスワードを分けて渡す使い方を前提にしています。保存期間（3日）とダウンロード回数を過ぎると自動で消えます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "送れるファイルの大きさと保存期間は？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "1ファイル最大50MBまで送れます。保存期間は3日間で、ダウンロード回数は1〜10回の範囲で送信者が指定します。上限に達するか3日を過ぎると自動で削除されます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "パスワードを忘れたら復旧できますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "できません。サーバー側にパスワードも平文も無い仕組み（ゼロ知識）のため、復旧手段がありません。もう一度送り直してください。"
+        }
+      }
+    ]
+  }
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Tailwind CDN が読み込めない環境でも最低限崩れないためのフォールバック -->
   <style>[hidden],.hidden{display:none!important}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}</style>
@@ -18,7 +101,7 @@
         <svg width="20" height="20" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
       </div>
       <div>
-        <h1 class="text-lg font-bold leading-tight">セキュアファイル共有</h1>
+        <h1 class="text-lg font-bold leading-tight">ファイル暗号化メーカー</h1>
         <p class="text-xs text-slate-500">ブラウザ内で暗号化する、PPAPに代わるファイル受け渡し</p>
       </div>
     </div>
@@ -124,11 +207,59 @@
         <p class="mt-1">相手にはURLとは<strong>別の手段</strong>（電話・チャット・SMSなど）で伝えてください。パスワードを忘れるとファイルは誰も復号できません。</p>
       </div>
 
+      <div>
+        <button id="copy-guide" type="button" class="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">相手への案内文をコピー</button>
+        <p id="guide-note" class="mt-2 text-xs text-slate-600">パスワードは、このURLとは別の方法（電話や別のアプリなど）で相手に伝えてください</p>
+      </div>
+
       <p id="result-summary" class="text-xs text-slate-500"></p>
 
       <button id="send-another" type="button" class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">別のファイルを送る</button>
     </section>
   </main>
+
+  <!-- サービス説明・FAQ（検索エンジン／AI検索向けの本文） -->
+  <section class="mx-auto max-w-2xl px-4 pb-12" aria-labelledby="about-heading">
+    <div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 id="about-heading" class="text-lg font-bold">ファイル暗号化メーカーとは</h2>
+      <p class="text-sm leading-relaxed text-slate-700">ファイル暗号化メーカーは、メールに添付できない大きさのファイルや、契約書・個人情報などの機密性の高いファイルを、取引先や家族に安全に渡すための無料のファイル共有ツールです。会員登録は要りません。</p>
+      <p class="text-sm leading-relaxed text-slate-700">暗号化はすべてあなたのブラウザの中で完結します。ファイルはパスワードから作った鍵（AES-GCM 256bit）で暗号化されてからアップロードされるため、サーバーには暗号化されたデータしか残りません。パスワードもサーバーには送られない「ゼロ知識」の仕組みなので、運営者を含め第三者が中身を見ることはできません。</p>
+      <div>
+        <h3 class="mb-2 text-sm font-semibold text-slate-800">使い方は3ステップ</h3>
+        <ol class="list-decimal space-y-1 pl-5 text-sm leading-relaxed text-slate-700">
+          <li>送りたいファイルを選ぶ（1ファイル最大50MB）</li>
+          <li>パスワードを決める（自動生成も可）</li>
+          <li>表示された URL とパスワードを、メールとチャットなど<strong>別々の手段</strong>で相手へ渡す</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <h2 class="mb-4 text-lg font-bold">よくある質問</h2>
+      <div class="space-y-3">
+        <details class="group rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+          <summary class="cursor-pointer text-sm font-semibold text-slate-800">無料で使えますか？</summary>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600">はい。会員登録も不要で、無料で使えます。</p>
+        </details>
+        <details class="group rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+          <summary class="cursor-pointer text-sm font-semibold text-slate-800">サーバーにファイルの中身を見られることはありますか？</summary>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600">ありません。ファイルは送信者のブラウザの中でパスワードから作った鍵で暗号化され、サーバーには暗号化されたデータしか保存されません。パスワードもサーバーには送られません。</p>
+        </details>
+        <details class="group rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+          <summary class="cursor-pointer text-sm font-semibold text-slate-800">パスワード付きZIP（PPAP）と何が違いますか？</summary>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600">PPAPは「暗号化ZIPとパスワードを同じ経路で送る」運用になりやすく、安全性に課題があります。ファイル暗号化メーカーは暗号化したデータだけをサーバーに預け、URLとパスワードを分けて渡す使い方を前提にしています。保存期間（3日）とダウンロード回数を過ぎると自動で消えます。</p>
+        </details>
+        <details class="group rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+          <summary class="cursor-pointer text-sm font-semibold text-slate-800">送れるファイルの大きさと保存期間は？</summary>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600">1ファイル最大50MBまで送れます。保存期間は3日間で、ダウンロード回数は1〜10回の範囲で送信者が指定します。上限に達するか3日を過ぎると自動で削除されます。</p>
+        </details>
+        <details class="group rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+          <summary class="cursor-pointer text-sm font-semibold text-slate-800">パスワードを忘れたら復旧できますか？</summary>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600">できません。サーバー側にパスワードも平文も無い仕組み（ゼロ知識）のため、復旧手段がありません。もう一度送り直してください。</p>
+        </details>
+      </div>
+    </div>
+  </section>
 
   <footer class="pb-10 text-center text-xs text-slate-400">
     暗号化方式: PBKDF2-SHA256（600,000回）＋ AES-GCM 256bit ／ Web Crypto API

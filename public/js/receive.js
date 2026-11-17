@@ -34,9 +34,49 @@ function showFatal(title, message) {
 }
 
 const token = new URLSearchParams(location.search).get('t');
-if (!token || !/^[A-Za-z0-9]{16}$/.test(token)) {
+const tokenValid = !!token && /^[A-Za-z0-9]{16}$/.test(token);
+if (!tokenValid) {
   showFatal('URLが正しくありません', '共有URLが途中で切れていないか、送信者に確認してください。');
 }
+
+// ---------- 残り回数・有効期限の表示（/api/info はダウンロード回数を消費しない） ----------
+function showFileInfo(message, type = 'info') {
+  const el = $('file-info');
+  el.className =
+    type === 'error'
+      ? 'rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700'
+      : 'rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800';
+  el.textContent = message;
+}
+
+async function loadFileInfo() {
+  let res;
+  try {
+    res = await fetch(`${API_BASE}/api/info/${encodeURIComponent(token)}`, { cache: 'no-store' });
+  } catch {
+    return; // 情報表示は補助なので、通信エラー時は何も出さない（受信フローはそのまま使える）
+  }
+  if (res.status === 404) {
+    showFileInfo('ファイルが見つかりません（期限切れ・削除済みの可能性があります）', 'error');
+    return;
+  }
+  if (res.status === 410) {
+    showFileInfo('ダウンロード回数の上限に達しています', 'error');
+    return;
+  }
+  if (!res.ok) return;
+  let info;
+  try {
+    info = await res.json();
+  } catch {
+    return;
+  }
+  const d = new Date(info.expiresAt); // ユーザーのローカル時刻で整形
+  showFileInfo(
+    `あと${info.remainingDownloads}回ダウンロードできます（${d.getMonth() + 1}月${d.getDate()}日${d.getHours()}時まで有効）`,
+  );
+}
+if (tokenValid) loadFileInfo();
 
 // 一度取得した暗号化データはメモリに保持する。
 // パスワードを間違えても再取得せずに済むので、ダウンロード回数を余分に消費しない。

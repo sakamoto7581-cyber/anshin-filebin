@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex">
   <!-- API のベースURL（index.html と同じ値にする） -->
   <meta name="api-base" content="">
-  <title>セキュアファイル共有 — 受信</title>
+  <title>ファイル暗号化メーカー｜ファイルの受け取り</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Tailwind CDN が読み込めない環境でも最低限崩れないためのフォールバック -->
   <style>[hidden],.hidden{display:none!important}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}</style>
@@ -18,7 +19,7 @@
         <svg width="20" height="20" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
       </div>
       <div>
-        <h1 class="text-lg font-bold leading-tight">セキュアファイル共有</h1>
+        <h1 class="text-lg font-bold leading-tight">ファイル暗号化メーカー</h1>
         <p class="text-xs text-slate-500">暗号化ファイルの受け取り</p>
       </div>
     </div>
@@ -30,6 +31,8 @@
         <h2 class="text-lg font-bold">ファイルが共有されています</h2>
         <p class="mt-1 text-sm text-slate-600">送信者から別の手段で伝えられたパスワードを入力してください。復号はこのブラウザ内で行われ、パスワードがサーバーに送られることはありません。</p>
       </div>
+
+      <p id="file-info" class="hidden rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800" aria-live="polite"></p>
 
       <div>
         <label for="password" class="mb-2 block text-sm font-semibold">パスワード</label>

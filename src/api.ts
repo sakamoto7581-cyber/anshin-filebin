@@ -141,6 +141,42 @@ app.post(
 );
 
 // ---------------------------------------------------------------------------
+// GET /api/info/:token — メタデータのみ返す（ダウンロード回数は消費しない）
+// ---------------------------------------------------------------------------
+app.get('/api/info/:token', async (c) => {
+  const token = c.req.param('token');
+  if (!TOKEN_RE.test(token)) return jsonError(404, 'not found');
+
+  const kv = c.env.KV;
+  const meta = await kv.get<FileMeta>(metaKey(token), 'json');
+  if (!meta) return jsonError(404, 'not found');
+
+  // ダウンロード時と同じく、絶対期限を過ぎていればメタ＋全チャンクを削除して 404
+  if (meta.expiresAt <= Date.now()) {
+    await deleteFile(kv, token, meta.chunks);
+    return jsonError(404, 'not found');
+  }
+
+  if (meta.currentDownloads >= meta.maxDownloads) {
+    return jsonError(410, 'ダウンロード回数の上限に達しました');
+  }
+
+  return new Response(
+    JSON.stringify({
+      size: meta.size,
+      maxDownloads: meta.maxDownloads,
+      currentDownloads: meta.currentDownloads,
+      remainingDownloads: meta.maxDownloads - meta.currentDownloads,
+      expiresAt: meta.expiresAt,
+    }),
+    {
+      status: 200,
+      headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
+    },
+  );
+});
+
+// ---------------------------------------------------------------------------
 // GET /api/download/:token
 // ---------------------------------------------------------------------------
 app.get('/api/download/:token', async (c) => {

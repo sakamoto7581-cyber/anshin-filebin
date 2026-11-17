@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://file.homepage-kobo.com/sitemap.xml
