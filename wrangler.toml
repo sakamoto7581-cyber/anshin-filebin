@@ -1,0 +1,11 @@
+name = "anshin-filebin"
+pages_build_output_dir = "public"
+compatibility_date = "2026-11-01"
+
+# ローカル開発（wrangler pages dev）用のバインディング定義。
+# 本番では Cloudflare ダッシュボードの Pages プロジェクト設定（Settings > Bindings）で
+# 同じ名前（KV）で紐付ける。
+[[kv_namespaces]]
+binding = "KV"
+id = "327f3d2b832942baa0564598e02f60cc"
+

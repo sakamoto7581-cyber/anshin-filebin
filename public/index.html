@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- API のベースURL。Pages と Worker を同じドメインで動かす場合は空のまま。
+       別ドメインの Worker を使う場合は例: content="https://secure-file-share.<account>.workers.dev" -->
+  <meta name="api-base" content="">
+  <title>セキュアファイル共有 — 送信</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind CDN が読み込めない環境でも最低限崩れないためのフォールバック -->
+  <style>[hidden],.hidden{display:none!important}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}</style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800 antialiased">
+  <header class="border-b border-slate-200 bg-white">
+    <div class="mx-auto flex max-w-2xl items-center gap-3 px-4 py-4">
+      <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-600 text-white">
+        <svg width="20" height="20" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      </div>
+      <div>
+        <h1 class="text-lg font-bold leading-tight">セキュアファイル共有</h1>
+        <p class="text-xs text-slate-500">ブラウザ内で暗号化する、PPAPに代わるファイル受け渡し</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-2xl px-4 py-8">
+    <div class="mb-6 flex gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+      <svg width="20" height="20" class="mt-0.5 h-5 w-5 flex-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/><path d="M9 12l2 2 4-4"/></svg>
+      <p>パスワードを使った暗号化はすべてあなたのブラウザ上で行われます。サーバー側でファイルの中身を見ることは不可能です。</p>
+    </div>
+
+    <!-- 送信フォーム -->
+    <form id="send-form" class="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" novalidate>
+      <div>
+        <label class="mb-2 block text-sm font-semibold">1. ファイルを選択</label>
+        <div id="drop-zone" tabindex="0" role="button" aria-label="ファイルを選択またはドロップ"
+             class="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 px-4 py-10 text-center transition hover:border-emerald-500 hover:bg-emerald-50/40 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <svg width="40" height="40" class="mb-3 h-10 w-10 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+          <p class="text-sm"><span class="font-semibold text-emerald-700">クリックして選択</span> またはここにドラッグ＆ドロップ</p>
+          <p class="mt-1 text-xs text-slate-500">1ファイル・最大 50MB</p>
+          <p id="file-info" class="mt-3 hidden break-all rounded-md bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700"></p>
+        </div>
+        <input id="file-input" type="file" class="sr-only">
+      </div>
+
+      <div>
+        <label for="password" class="mb-2 block text-sm font-semibold">2. パスワード</label>
+        <div class="flex gap-2">
+          <div class="relative flex-1">
+            <input id="password" type="password" autocomplete="new-password" required
+                   class="w-full rounded-lg border border-slate-300 px-3 py-2.5 pr-16 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                   placeholder="相手と共有するパスワード">
+            <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 px-3 text-xs font-medium text-slate-500 hover:text-slate-800">表示</button>
+          </div>
+          <button type="button" id="gen-password" class="whitespace-nowrap rounded-lg border border-slate-300 px-3 text-sm font-medium text-slate-700 hover:bg-slate-50">自動生成</button>
+        </div>
+        <p id="password-hint" class="mt-1.5 text-xs text-slate-500">推測されにくい 12 文字以上を推奨します。</p>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label for="max-downloads" class="mb-2 block text-sm font-semibold">3. ダウンロード可能回数</label>
+          <select id="max-downloads" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+            <option value="1" selected>1 回</option>
+            <option value="2">2 回</option>
+            <option value="3">3 回</option>
+            <option value="4">4 回</option>
+            <option value="5">5 回</option>
+            <option value="6">6 回</option>
+            <option value="7">7 回</option>
+            <option value="8">8 回</option>
+            <option value="9">9 回</option>
+            <option value="10">10 回</option>
+          </select>
+        </div>
+        <div>
+          <span class="mb-2 block text-sm font-semibold">保存期間</span>
+          <div class="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700">
+            <svg width="16" height="16" class="h-4 w-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            <span>アップロードから <strong>3日間</strong>（自動削除）</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="status" class="hidden rounded-lg px-4 py-3 text-sm" role="status" aria-live="polite"></div>
+      <div id="progress-wrap" class="hidden">
+        <div class="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+          <div id="progress-bar" class="h-full w-0 rounded-full bg-emerald-600 transition-all"></div>
+        </div>
+      </div>
+
+      <button id="submit-btn" type="submit"
+              class="w-full rounded-lg bg-emerald-600 px-4 py-3 font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50">
+        暗号化してアップロード
+      </button>
+    </form>
+
+    <!-- 完了表示 -->
+    <section id="result" class="hidden space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div class="flex items-center gap-2 text-emerald-700">
+        <svg width="24" height="24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>
+        <h2 class="text-lg font-bold">アップロードが完了しました</h2>
+      </div>
+
+      <div>
+        <label for="share-url" class="mb-1.5 block text-sm font-semibold">共有URL</label>
+        <div class="flex gap-2">
+          <input id="share-url" type="text" readonly class="flex-1 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2.5 font-mono text-sm">
+          <button id="copy-url" type="button" class="whitespace-nowrap rounded-lg bg-slate-800 px-4 text-sm font-semibold text-white hover:bg-slate-900">コピー</button>
+        </div>
+      </div>
+
+      <div>
+        <label for="share-password" class="mb-1.5 block text-sm font-semibold">パスワード</label>
+        <div class="flex gap-2">
+          <input id="share-password" type="text" readonly class="flex-1 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2.5 font-mono text-sm">
+          <button id="copy-password" type="button" class="whitespace-nowrap rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50">コピー</button>
+        </div>
+      </div>
+
+      <div class="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <p class="font-semibold">⚠ パスワードはこの画面にしか表示されません。</p>
+        <p class="mt-1">相手にはURLとは<strong>別の手段</strong>（電話・チャット・SMSなど）で伝えてください。パスワードを忘れるとファイルは誰も復号できません。</p>
+      </div>
+
+      <p id="result-summary" class="text-xs text-slate-500"></p>
+
+      <button id="send-another" type="button" class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">別のファイルを送る</button>
+    </section>
+  </main>
+
+  <footer class="pb-10 text-center text-xs text-slate-400">
+    暗号化方式: PBKDF2-SHA256（600,000回）＋ AES-GCM 256bit ／ Web Crypto API
+  </footer>
+
+  <script type="module" src="js/send.js"></script>
+</body>
+</html>
