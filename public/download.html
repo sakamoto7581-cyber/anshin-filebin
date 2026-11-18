@@ -8,72 +8,224 @@
   <!-- API のベースURL（index.html と同じ値にする） -->
   <meta name="api-base" content="">
   <title>ファイル暗号化メーカー｜ファイルの受け取り</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Tailwind CDN が読み込めない環境でも最低限崩れないためのフォールバック -->
-  <style>[hidden],.hidden{display:none!important}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}</style>
+  <style>
+  /* ===== ホームページ工房（Webツール工房）共通デザイン ===== */
+  :root{
+    color-scheme:light;
+    --bg:#FFFFFF; --bg-alt:#F3F6F9; --bg-soft:#EAF0F6;
+    --ink:#0D1B2A; --ink2:#22344A; --mut:#52657C; --faint:#8598AE;
+    --line:#DCE4ED; --line-soft:#E8EEF4;
+    --navy:#0A2540; --navy2:#0D2F52;
+    --blue:#0E5BD7; --blue-d:#0A49AE; --blue-soft:#E7F0FD;
+    --max:1200px; --head:76px;
+    --shadow:0 24px 60px rgba(10,37,64,.14);
+    --shadow-sm:0 10px 30px rgba(10,37,64,.10);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{ color-scheme:dark;
+      --bg:#0A1320; --bg-alt:#0E1A2B; --bg-soft:#132439;
+      --ink:#EDF3FA; --ink2:#D5E1EE; --mut:#A3B4C8; --faint:#7186A0;
+      --line:#22364E; --line-soft:#1A2C42;
+      --blue:#4D8FE8; --blue-d:#7FB0F0; --blue-soft:#12283F;
+      --shadow:0 24px 60px rgba(0,0,0,.5); --shadow-sm:0 10px 30px rgba(0,0,0,.4);
+    }
+  }
+  [hidden],.hidden{display:none!important}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Noto Sans JP",system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.85;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .wrap{width:min(var(--max),calc(100% - 48px));margin:0 auto}
+
+  /* ===== ヘッダー（工房共通） ===== */
+  .header{position:sticky;top:0;z-index:100;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .header-in{height:var(--head);display:flex;align-items:center;justify-content:space-between;gap:24px}
+  .header-left{display:flex;align-items:center;gap:14px;min-width:0}
+  .logo{display:inline-flex;flex:none}
+  .logo img{height:44px;width:auto}
+  .logo .logo-w{display:none}
+  @media (prefers-color-scheme:dark){.logo .logo-c{display:none}.logo .logo-w{display:block}}
+  .mode-switch{display:inline-flex;align-items:center;background:var(--bg-alt);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;flex:none}
+  .mode-tab{padding:5px 12px;border-radius:999px;font-size:12.5px;font-weight:700;text-decoration:none;color:var(--mut);transition:all .2s;white-space:nowrap;line-height:1.2}
+  .mode-tab.is-active{background:var(--navy);color:#fff;box-shadow:0 2px 6px rgba(10,37,64,.18)}
+  @media (prefers-color-scheme:dark){.mode-tab.is-active{background:var(--blue);color:#fff}}
+  .hnav{display:flex;align-items:center;gap:26px;font-size:14px;font-weight:700}
+  .hnav a{text-decoration:none;color:var(--ink2);white-space:nowrap}
+  .hnav a:hover{color:var(--blue)}
+  @media(max-width:900px){.hnav{display:none}}
+  @media(max-width:640px){.mode-switch{display:none}.logo img{height:30px}}
+
+  /* ===== ツール本体 ===== */
+  .tool-wrap{width:min(640px,calc(100% - 48px));margin:0 auto;padding:44px 0 8px}
+  .tool-eyebrow{font-family:"Archivo",sans-serif;font-size:11px;letter-spacing:.22em;color:var(--blue);font-weight:700;margin:0 0 10px}
+  .tool-head h1{margin:0;font-size:clamp(28px,4vw,38px);line-height:1.35;font-weight:900;letter-spacing:.01em;color:var(--ink)}
+  .tool-lead{margin:12px 0 0;color:var(--mut);font-size:15px;line-height:1.8}
+  .card{background:var(--bg);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-sm);padding:28px;margin-top:26px}
+  .card h2{margin:0;font-size:19px;font-weight:900}
+  .card .lead-p{margin:9px 0 0;font-size:14.5px;line-height:1.8;color:var(--mut)}
+  .field{margin-top:22px}
+  .flabel{display:block;font-size:14px;font-weight:700;margin-bottom:9px;color:var(--ink)}
+  input[type="text"],input[type="password"]{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  input::placeholder{color:var(--faint)}
+  input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+  #status{margin-top:22px}
+  #progress-wrap{margin-top:22px}
+  .ptrack{height:8px;border-radius:999px;background:var(--bg-soft);overflow:hidden}
+  .pbar{height:100%;width:0;border-radius:999px;background:var(--blue);transition:width .2s}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:15px 26px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;border:1px solid transparent;line-height:1.3;transition:background .2s,border-color .2s;cursor:pointer;font:inherit}
+  .btn-block{width:100%}
+  .btn-blue{background:var(--blue);color:#fff}
+  .btn-blue:hover{background:var(--blue-d)}
+  button:disabled{cursor:not-allowed;opacity:.5}
+  .fineprint{font-size:12.5px;color:var(--mut);line-height:1.75;margin:22px 0 0}
+  .done-head{display:flex;align-items:center;gap:10px;color:var(--blue)}
+  .done-head h2{margin:0;font-size:19px;font-weight:900;color:var(--ink)}
+  .done-p{margin:14px 0 20px;font-size:14.5px;line-height:1.8;color:var(--mut)}
+  .fatal-card{border-color:#FECACA}
+  @media (prefers-color-scheme:dark){.fatal-card{border-color:#5C2E2E}}
+  .fatal-card h2{color:#B91C1C}
+  @media (prefers-color-scheme:dark){.fatal-card h2{color:#F0B9B9}}
+  .fatal-card p{margin:10px 0 0;font-size:14.5px;line-height:1.8;color:var(--mut)}
+  .text-link{display:inline-block;margin-top:18px;font-size:14px;font-weight:700;color:var(--blue);text-decoration:none}
+  .text-link:hover{text-decoration:underline}
+
+  .tech-note{text-align:center;font-size:12px;color:var(--faint);padding:26px 16px 34px;margin:0}
+
+  /* ===== フッター（工房共通） ===== */
+  .footer{background:#06182C;color:#fff;padding:72px 0 56px}
+  .foot-grid{display:grid;grid-template-columns:1.5fr .7fr .7fr;gap:40px}
+  .foot-logo img{height:52px;width:auto}
+  .foot-logo p{color:#93A9C2;font-size:13.5px;margin:16px 0 0;max-width:26em;line-height:1.8}
+  .foot-grid h4{font-family:"Archivo",sans-serif;font-size:11px;letter-spacing:.22em;color:#7E97B4;margin:4px 0 16px;font-weight:700}
+  .foot-grid nav{display:grid;gap:10px;font-size:14px}
+  .foot-grid a{text-decoration:none;color:#D3DEEB}
+  .foot-grid a:hover{color:#fff}
+  .ig-foot{margin-top:12px}
+  .ig-foot a{display:inline-flex;align-items:center;gap:7px;color:#CFE0F7;text-decoration:none;font-size:13px;font-weight:600}
+  .ig-foot a:hover{color:#fff}
+  .ig-foot svg{width:17px;height:17px}
+  .foot-shelf{margin-top:46px;border-top:1px solid rgba(255,255,255,.13);padding-top:26px;position:relative}
+  .shelf-sw{position:absolute;opacity:0;pointer-events:none}
+  .shelf-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .foot-shelf h4{font-family:"Archivo",sans-serif;font-size:11px;letter-spacing:.22em;color:#7E97B4;font-weight:700;margin:0}
+  .shelf-btn{display:none;color:#D3DEEB;font-size:13px;border:1px solid #33507A;border-radius:999px;padding:7px 16px;cursor:pointer}
+  .pills{display:flex;flex-wrap:wrap;gap:9px}
+  .pill{border:1px solid #2A4A73;color:#C7D5E8;font-size:13.5px;padding:7px 15px;border-radius:999px;text-decoration:none;line-height:1.5}
+  .pill:hover{background:#0E5BD7;border-color:#0E5BD7;color:#fff}
+  .shelf-note{margin-top:16px;font-size:13px;color:#93A9C2}
+  .shelf-note a{color:#D3DEEB}
+  @media(max-width:900px){
+    .shelf-btn{display:inline-block}
+    .pills,.shelf-note{display:none}
+    .shelf-sw:checked~.pills{display:flex}
+    .shelf-sw:checked~.shelf-note{display:block}
+    .foot-grid{grid-template-columns:1fr 1fr}
+  }
+  @media(max-width:560px){.foot-grid{grid-template-columns:1fr}}
+  .copy{border-top:1px solid rgba(255,255,255,.12);margin-top:46px;padding-top:22px;color:#7E97B4;font-size:12.5px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+  /* ===== JS連携用ユーティリティ =====
+     send.js / receive.js はステータス表示などで className を丸ごと差し替える。
+     その際に付くクラス名に対するスタイルを、工房パレットで定義しておく。 */
+  .rounded-lg{border-radius:12px}
+  .px-4{padding-left:16px;padding-right:16px}
+  .py-3{padding-top:12px;padding-bottom:12px}
+  .text-sm{font-size:14px;line-height:1.7}
+  .border{border-width:1px;border-style:solid}
+  .bg-slate-100{background:var(--bg-alt)}
+  .text-slate-700{color:var(--ink2)}
+  .bg-red-50{background:#FEF2F2}
+  .text-red-700{color:#B91C1C}
+  .border-red-200{border-color:#FECACA}
+  .bg-emerald-50{background:var(--blue-soft)}
+  .text-emerald-800{color:var(--navy)}
+  .border-emerald-200{border-color:#B9D2F5}
+  .border-emerald-500{border-color:var(--blue)!important}
+  @media (prefers-color-scheme:dark){
+    .bg-red-50{background:#3A1D1D}
+    .text-red-700{color:#F0B9B9}
+    .border-red-200{border-color:#5C2E2E}
+    .text-emerald-800{color:#BFD9F8}
+    .border-emerald-200{border-color:#2A4A73}
+  }
+  </style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-800 antialiased">
-  <header class="border-b border-slate-200 bg-white">
-    <div class="mx-auto flex max-w-xl items-center gap-3 px-4 py-4">
-      <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-600 text-white">
-        <svg width="20" height="20" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+<body>
+  <header class="header">
+    <div class="wrap header-in">
+      <div class="header-left">
+        <a class="logo" href="https://homepage-kobo.com/" aria-label="ホームページ工房（本サイト）へ"><img class="logo-c" src="https://homepage-kobo.com/assets/logo.svg" alt="ホームページ工房"><img class="logo-w" src="https://homepage-kobo.com/assets/logo-white.svg" alt="" aria-hidden="true"></a>
+        <div class="mode-switch" role="navigation" aria-label="サイト切り替え">
+          <a class="mode-tab" href="https://homepage-kobo.com/">HP制作</a>
+          <a class="mode-tab is-active" href="https://homepage-kobo.com/tools/">Webツール工房</a>
+        </div>
       </div>
-      <div>
-        <h1 class="text-lg font-bold leading-tight">ファイル暗号化メーカー</h1>
-        <p class="text-xs text-slate-500">暗号化ファイルの受け取り</p>
-      </div>
+      <nav class="hnav" aria-label="サイト内リンク">
+        <a href="https://homepage-kobo.com/tools/">道具一覧</a>
+        <a href="https://homepage-kobo.com/">本サイト（HP制作）</a>
+      </nav>
     </div>
   </header>
 
-  <main class="mx-auto max-w-xl px-4 py-8">
-    <form id="receive-form" class="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" novalidate>
+  <main class="tool-wrap">
+    <div class="tool-head">
+      <p class="tool-eyebrow">FREE TOOL</p>
+      <h1>ファイル暗号化メーカー</h1>
+      <p class="tool-lead">暗号化ファイルの受け取り</p>
+    </div>
+
+    <form id="receive-form" class="card" novalidate>
       <div>
-        <h2 class="text-lg font-bold">ファイルが共有されています</h2>
-        <p class="mt-1 text-sm text-slate-600">送信者から別の手段で伝えられたパスワードを入力してください。復号はこのブラウザ内で行われ、パスワードがサーバーに送られることはありません。</p>
+        <h2>ファイルが共有されています</h2>
+        <p class="lead-p">送信者から別の手段で伝えられたパスワードを入力してください。復号はこのブラウザ内で行われ、パスワードがサーバーに送られることはありません。</p>
       </div>
 
-      <p id="file-info" class="hidden rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800" aria-live="polite"></p>
+      <p id="file-info" class="hidden" aria-live="polite"></p>
 
-      <div>
-        <label for="password" class="mb-2 block text-sm font-semibold">パスワード</label>
-        <input id="password" type="password" autocomplete="off" required
-               class="w-full rounded-lg border border-slate-300 px-3 py-2.5 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+      <div class="field">
+        <label for="password" class="flabel">パスワード</label>
+        <input id="password" type="password" autocomplete="off" required>
       </div>
 
-      <div id="status" class="hidden rounded-lg px-4 py-3 text-sm" role="status" aria-live="polite"></div>
+      <div id="status" class="hidden" role="status" aria-live="polite"></div>
       <div id="progress-wrap" class="hidden">
-        <div class="h-2 w-full overflow-hidden rounded-full bg-slate-200">
-          <div id="progress-bar" class="h-full w-0 rounded-full bg-emerald-600 transition-all"></div>
+        <div class="ptrack">
+          <div id="progress-bar" class="pbar"></div>
         </div>
       </div>
 
-      <button id="submit-btn" type="submit"
-              class="w-full rounded-lg bg-emerald-600 px-4 py-3 font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50">
-        復号してダウンロード
-      </button>
+      <div class="field">
+        <button id="submit-btn" type="submit" class="btn btn-blue btn-block">
+          復号してダウンロード
+        </button>
+      </div>
 
-      <p class="text-xs text-slate-500">※ ダウンロード回数は、ボタンを押してサーバーから暗号化データを取得した時点で 1 回消費されます。パスワードを間違えた場合は、このページを閉じずにそのまま入力し直してください（再取得はせず、追加で回数を消費しません）。</p>
+      <p class="fineprint">※ ダウンロード回数は、ボタンを押してサーバーから暗号化データを取得した時点で 1 回消費されます。パスワードを間違えた場合は、このページを閉じずにそのまま入力し直してください（再取得はせず、追加で回数を消費しません）。</p>
     </form>
 
-    <section id="done" class="hidden space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div class="flex items-center gap-2 text-emerald-700">
-        <svg width="24" height="24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>
-        <h2 class="text-lg font-bold">復号に成功しました</h2>
+    <section id="done" class="card hidden">
+      <div class="done-head">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>
+        <h2>復号に成功しました</h2>
       </div>
-      <p class="text-sm text-slate-600">ダウンロードが自動で始まらない場合は、下のボタンから保存してください。</p>
-      <a id="save-link" href="#" class="block w-full break-all rounded-lg bg-emerald-600 px-4 py-3 text-center font-semibold text-white hover:bg-emerald-700">保存する</a>
+      <p class="done-p">ダウンロードが自動で始まらない場合は、下のボタンから保存してください。</p>
+      <a id="save-link" href="#" class="btn btn-blue btn-block">保存する</a>
     </section>
 
-    <section id="fatal" class="hidden rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-      <h2 class="text-lg font-bold text-red-700" id="fatal-title">ファイルを取得できません</h2>
-      <p class="mt-2 text-sm text-slate-600" id="fatal-message"></p>
-      <a href="index.html" class="mt-4 inline-block text-sm font-semibold text-emerald-700 hover:underline">ファイルを送る側の画面へ</a>
+    <section id="fatal" class="card fatal-card hidden">
+      <h2 id="fatal-title">ファイルを取得できません</h2>
+      <p id="fatal-message"></p>
+      <a href="index.html" class="text-link">ファイルを送る側の画面へ</a>
     </section>
   </main>
 
-  <footer class="pb-10 text-center text-xs text-slate-400">
-    暗号化方式: PBKDF2-SHA256（600,000回）＋ AES-GCM 256bit ／ Web Crypto API
-  </footer>
+  <p class="tech-note">暗号化方式: PBKDF2-SHA256（600,000回）＋ AES-GCM 256bit ／ Web Crypto API</p>
+
+  <footer class="footer"><div class="wrap"><div class="foot-grid">
+    <div class="foot-logo"><img src="https://homepage-kobo.com/assets/logo-white.svg" alt="ホームページ工房"><p>ホームページ工房（Webツール工房）の無料ツールの一つです。ファイルはあなたのブラウザ内で暗号化してから送信され、サーバーには暗号化されたデータしか残りません。</p>
+    <p class="ig-foot"><a href="https://www.instagram.com/homepage_kobo/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="0.7" fill="currentColor" stroke="none"/></svg> Instagram @homepage_kobo</a></p><p class="ig-foot"><a href="https://sakamoto-works.com" target="_blank" rel="noopener">SAKAMOTO WORKS の事業です</a></p></div>
+    <div><h4>SITEMAP</h4><nav><a href="https://homepage-kobo.com/tools/">ツールトップ</a><a href="https://homepage-kobo.com/">ホームページ工房 本サイト</a></nav></div>
+    <div><h4>LEGAL / CONTACT</h4><nav><a href="https://homepage-kobo.com/tokushoho.html">特定商取引法に基づく表記</a><a href="https://homepage-kobo.com/privacy.html">プライバシーポリシー</a><a href="https://lin.ee/oQezkWp" target="_blank" rel="noopener">LINEで無料相談 →</a></nav></div>
+  </div><div class="foot-shelf"><input type="checkbox" id="shelf-sw" class="shelf-sw"><div class="shelf-head"><h4>FREE TOOLS</h4><label class="shelf-btn" for="shelf-sw">道具棚を開く ▾</label></div><nav class="pills"><a class="pill" href="https://homepage-kobo.com/tools/prompt/">プロンプトメーカー</a><a class="pill" href="https://homepage-kobo.com/tools/resize/">画像仕上げメーカー</a><a class="pill" href="https://homepage-kobo.com/tools/qr/">QRコードメーカー</a><a class="pill" href="https://homepage-kobo.com/tools/pdf/">PDF整理メーカー</a><a class="pill" href="https://homepage-kobo.com/tools/calendar/">営業カレンダーメーカー</a><a class="pill" href="https://homepage-kobo.com/tools/convert/">画像変換メーカー</a><a class="pill" href="https://homepage-kobo.com/tools/color/">カラー抽出メーカー</a><a class="pill" href="https://file.homepage-kobo.com/">ファイル暗号化メーカー</a><a class="pill" href="https://homepage-kobo.com/tools/signature/">メール署名メーカー</a><a class="pill" href="https://homepage-kobo.com/tools/id-photo/">証明写真メーカー</a><a class="pill" href="https://homepage-kobo.com/tools/mosaic/">モザイク・ぼかしメーカー</a><a class="pill" href="https://homepage-kobo.com/tools/pdf-write/">PDF文字入れメーカー</a><a class="pill" href="https://homepage-kobo.com/tools/photo-pdf/">写真PDFメーカー</a><a class="pill" href="https://homepage-kobo.com/tools/password/">パスワード生成メーカー</a><a class="pill" href="https://homepage-kobo.com/tools/count/">文字数カウントメーカー</a><a class="pill" href="https://homepage-kobo.com/tools/date-calc/">年齢・日数計算メーカー</a><a class="pill" href="https://homepage-kobo.com/tools/unit/">単位変換メーカー</a><a class="pill" href="https://homepage-kobo.com/tools/newyear/">年賀状宛名メーカー</a><a class="pill" href="https://homepage-kobo.com/tools/resume/">履歴書メーカー</a><a class="pill" href="https://homepage-kobo.com/tools/loan/">ローン計算メーカー</a><a class="pill" href="https://homepage-kobo.com/tools/invoice/">請求書メーカー</a></nav><p class="shelf-note">すべての道具は<a href="https://homepage-kobo.com/tools/">ツールトップ</a>でカテゴリ・キーワードから探せます</p></div><div class="copy"><span>© 2026 ホームページ工房</span><span>HOMEPAGE KOBO / FREE TOOLS</span></div></div></footer>
 
   <script type="module" src="js/receive.js"></script>
 </body>
